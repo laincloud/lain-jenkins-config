@@ -1,0 +1,52 @@
+#!/usr/bin/env python
+
+import jenkins
+import optparse
+import sys
+
+from jenkins_job import create_jobs
+from jenkins_plugin import install_plugins
+from subprocess import check_call
+
+
+def option_parse():
+    parser = optparse.OptionParser()
+    parser.add_option('-a', '--address', action = "store", type = "string",
+                      default='http://localhost:8080',
+                      help="jenkins address")
+    parser.add_option('-u', '--username', action = "store", type = "string",
+                      help="username of jenkins")
+    parser.add_option('-p', '--password', action = "store", type = "string",
+                      help="passworld of jenkins")
+    parser.add_option('-i', '--install', action = "store_true",
+                      help="install plugin for jenkins")
+    parser.add_option('-c', '--createjob', action = "store_true",
+                      help="create jobs in jenkins")
+
+    return parser.parse_args()
+
+
+def _jenkins_server(address, username, password):
+    try:
+        server = jenkins.Jenkins(address, username, password)
+        return server
+    except Exception as e:
+        print e
+        sys.exit(1)
+
+def _exec_shell(cmd):
+    return check_call(cmd)
+
+def main():
+    options, args = option_parse()
+    print options
+    server = _jenkins_server(options.address, options.username, options.password)
+    if options.install:
+        install_plugins(server)
+        _exec_shell(['systemctl', 'restart', 'jenkins'])
+    if options.createjob:
+        create_jobs(server)
+
+
+if __name__ == '__main__':
+    sys.exit(main())
