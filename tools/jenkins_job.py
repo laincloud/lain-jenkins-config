@@ -4,6 +4,9 @@ import os
 
 here = os.path.abspath(os.path.dirname(__file__))
 
+job_config_dir = 'job_configs'
+
+
 
 class Job:
     def __init__(self, name='', config_file=''):
@@ -17,7 +20,9 @@ def output_shell(cmd):
 
 
 def _jobs():
-    job_dirs = os.listdir(here)
+    job_root_dir = here + '/../'+job_config_dir
+    os.chdir(job_root_dir)
+    job_dirs = os.listdir('.')
     jobs = []
     for job_dir in job_dirs:
         if not os.path.isdir(job_dir) or not job_dir.startswith('lain'):
@@ -41,4 +46,4 @@ def create_jobs(server):
                 print 'reconfig job %s successed' % job.name
             except Exception as e:
                 print 'reconfig job %s failed' % job.name
-        
+
